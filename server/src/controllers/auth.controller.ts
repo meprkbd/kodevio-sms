@@ -1,8 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
+import crypto from "crypto";
+
 import { catchAsyncErrors } from "../utils/catchAsyncErrors.js";
 import User from "../models/user.model.js";
 import ApiError from "../utils/apiError.js";
 import { clearCookie, setCookie } from "../utils/cookies.js";
+import { sendOTP } from "../utils/emails.js";
+import { validateAndClearOTP } from "../utils/otp.js";
 
 export const register = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -63,6 +67,76 @@ export const logout = catchAsyncErrors(
     res.status(200).json({
       success: true,
       message: "Logged out successfully",
+    });
+  }
+);
+
+export const forgotPassword = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email }).select(
+      "+resetPasswordOtp +resetPasswordOtpExpires"
+    );
+
+    if (!user) {
+      return next(new ApiError(404, "User not found"));
+    }
+
+    if (
+      user.resetPasswordOtp &&
+      user.resetPasswordOtpExpires &&
+      user.resetPasswordOtpExpires > new Date()
+    ) {
+      return next(
+        new ApiError(
+          400,
+          "A password reset request is already in progress. Please check your email for the reset OTP."
+        )
+      );
+    }
+
+    const resetOtp = user.generateResetPasswordOtp();
+    await user.save({ validateBeforeSave: false });
+
+    await sendOTP(email, resetOtp, user.username);
+
+    res.status(200).json({
+      message: `A password reset OTP has been sent to ${user.email}. Please check your inbox to proceed.`,
+    });
+  }
+);
+
+export const verifyOtp = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email }).select(
+      "+resetPasswordOtp +resetPasswordOtpExpires"
+    );
+
+    if (!user) {
+      return next(new ApiError(404, "User not found"));
+    }
+
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    await validateAndClearOTP(user);
+
+    const isOtpValid = user.resetPasswordOtp === hashedOtp;
+    if (!isOtpValid) {
+      return next(new ApiError(400, "Invalid OTP. Please try again."));
+    }
+
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordOtpExpires = undefined;
+    await user.save();
+
+    const authToken = user.generateAuthToken();
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
     });
   }
 );
