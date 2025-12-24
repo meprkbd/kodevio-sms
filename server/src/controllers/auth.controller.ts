@@ -128,15 +128,62 @@ export const verifyOtp = catchAsyncErrors(
       return next(new ApiError(400, "Invalid OTP. Please try again."));
     }
 
+    // Generate reset password token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    user.resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    user.resetPasswordTokenExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save({ validateBeforeSave: false });
+
     user.resetPasswordOtp = undefined;
     user.resetPasswordOtpExpires = undefined;
     await user.save();
 
-    const authToken = user.generateAuthToken();
-
     res.status(200).json({
       success: true,
       message: "OTP verified successfully",
+      resetToken,
+    });
+  }
+);
+
+export const resetPassword = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return next(new ApiError(400, "Password is required"));
+    }
+
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token!)
+      .digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordTokenExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return next(new ApiError(400, "Invalid or expired reset token"));
+    }
+
+    user.password = password;
+
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
     });
   }
 );

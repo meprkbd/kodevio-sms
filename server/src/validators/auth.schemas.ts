@@ -43,3 +43,20 @@ export const verifyOtpSchema = z.object({
     .nonempty("OTP is required")
     .length(6, "OTP must be exactly 6 characters long"),
 });
+
+export const resetPasswordSchema = z.object({
+  password: z
+    .string()
+    .nonempty("Password is required")
+    .min(8, "Password must be at least 8 characters long"),
+  confirmPassword: z
+    .string()
+    .nonempty("Confirm password is required")
+    .min(8, "Confirm Password must be at least 8 characters long"),
+});
+
+export type RegisterSchema = z.infer<typeof registerSchema>;
+export type VerifyOtpSchema = z.infer<typeof verifyOtpSchema>;
+export type LoginSchema = z.infer<typeof loginSchema>;
+export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;

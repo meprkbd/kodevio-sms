@@ -37,6 +37,13 @@ const userSchema = new Schema<IUserDocument>(
     resetPasswordOtpExpires: {
       type: Date,
     },
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+    resetPasswordTokenExpires: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
