@@ -10,6 +10,8 @@ import type { Request, Response } from "express";
 import { ENV } from "./config/env.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import authRoutes from "./routes/auth.route.js";
+import folderRoutes from "./routes/folder.route.js";
+import fileRoutes from "./routes/file.route.js";
 
 const app = express();
 
@@ -49,6 +51,8 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("api/v1/folders", folderRoutes);
+app.use("/api/v1/files", fileRoutes);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
