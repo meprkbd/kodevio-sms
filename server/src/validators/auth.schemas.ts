@@ -31,3 +31,15 @@ export const loginSchema = z.object({
     .nonempty("Password is required")
     .min(8, "Password must be at least 8 characters long"),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().nonempty("Email is required").email("Invalid email format"),
+});
+
+export const verifyOtpSchema = z.object({
+  email: z.string().nonempty("Email is required").email("Invalid email format"),
+  otp: z
+    .string()
+    .nonempty("OTP is required")
+    .length(6, "OTP must be exactly 6 characters long"),
+});

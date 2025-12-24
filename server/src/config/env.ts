@@ -18,4 +18,8 @@ export const ENV = {
   JWT_SECRET: getEnv("JWT_SECRET"),
   JWT_EXPIRES_IN: getEnv("JWT_EXPIRES_IN"),
   COOKIE_EXPIRES_IN: getEnv("COOKIE_EXPIRES_IN"),
+
+  SMTP_SERVICE: getEnv("SMTP_SERVICE"),
+  SMTP_USER: getEnv("SMTP_USER"),
+  SMTP_PASS: getEnv("SMTP_PASS"),
 };
