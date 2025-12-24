@@ -14,4 +14,8 @@ export const ENV = {
 
   CLIENT_URL: getEnv("CLIENT_URL", false) || "http://localhost:3000",
   MONGO_URI: getEnv("MONGO_URI"),
+
+  JWT_SECRET: getEnv("JWT_SECRET"),
+  JWT_EXPIRES_IN: getEnv("JWT_EXPIRES_IN"),
+  COOKIE_EXPIRES_IN: getEnv("COOKIE_EXPIRES_IN"),
 };
