@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { catchAsyncErrors } from "../utils/catchAsyncErrors.js";
 import User from "../models/user.model.js";
 import ApiError from "../utils/apiError.js";
-import { setCookie } from "../utils/cookies.js";
+import { clearCookie, setCookie } from "../utils/cookies.js";
 
 export const register = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -53,6 +53,16 @@ export const login = catchAsyncErrors(
         username: user.username,
         email: user.email,
       },
+    });
+  }
+);
+
+export const logout = catchAsyncErrors(
+  async (_req: Request, res: Response, _next: NextFunction) => {
+    clearCookie(res, "access_token");
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
     });
   }
 );
