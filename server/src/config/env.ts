@@ -22,4 +22,9 @@ export const ENV = {
   SMTP_SERVICE: getEnv("SMTP_SERVICE"),
   SMTP_USER: getEnv("SMTP_USER"),
   SMTP_PASS: getEnv("SMTP_PASS"),
+
+  USER_STORAGE_LIMIT: parseInt(
+    getEnv("USER_STORAGE_LIMIT", false) || "5368709120",
+    10
+  ),
 };
