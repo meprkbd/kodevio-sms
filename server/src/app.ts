@@ -51,7 +51,7 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
-app.use("api/v1/folders", folderRoutes);
+app.use("/api/v1/folders", folderRoutes);
 app.use("/api/v1/files", fileRoutes);
 
 app.use((_req: Request, res: Response) => {
