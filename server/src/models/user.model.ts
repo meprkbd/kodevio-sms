@@ -1,8 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs";
+import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 
 import type { IUserDocument } from "../types/user.types.js";
+import { ENV } from "../config/env.js";
 
 const userSchema = new Schema<IUserDocument>(
   {
@@ -44,6 +46,29 @@ userSchema.pre<IUserDocument>("save", async function () {
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
 });
+
+// Verify password method
+userSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Generate JWT token method
+userSchema.methods.generateAuthToken = function (): string {
+  const token = jwt.sign(
+    {
+      id: this._id,
+      email: this.email,
+    },
+    ENV.JWT_SECRET as Secret,
+    {
+      expiresIn: ENV.JWT_EXPIRES_IN,
+      algorithm: "HS256",
+    } as SignOptions
+  );
+  return token;
+};
 
 // User schema indexes
 userSchema.index({ resetPasswordOtp: 1 });
