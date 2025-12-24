@@ -9,6 +9,8 @@ export interface IUser {
   confirmPassword: string;
   resetPasswordOtp?: string | undefined;
   resetPasswordOtpExpires?: Date | undefined;
+  resetPasswordToken?: string | undefined;
+  resetPasswordTokenExpires?: Date | undefined;
   createdAt: Date;
   updatedAt: Date;
 }
