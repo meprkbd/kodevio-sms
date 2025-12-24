@@ -9,6 +9,7 @@ import hpp from "hpp";
 import type { Request, Response } from "express";
 import { ENV } from "./config/env.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import authRoutes from "./routes/auth.route.js";
 
 const app = express();
 
@@ -46,6 +47,8 @@ app.get("/", (_req: Request, res: Response) => {
     message: "Server running successfully",
   });
 });
+
+app.use("/api/v1/auth", authRoutes);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
